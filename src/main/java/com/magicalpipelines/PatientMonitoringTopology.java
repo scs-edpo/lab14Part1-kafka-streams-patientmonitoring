@@ -101,7 +101,9 @@ class PatientMonitoringTopology {
                 })
             // 5.1
             .filter((key, value) -> value >= 100)
-            // 6
+            // 6: windowed aggregations change the record key. Therefore,
+                // we’ll need to rekey the heart rate records by patient ID to meet the
+                //co-partitioning requirements for joining records.
             .map(
                 (windowedKey, value) -> {
                   return KeyValue.pair(windowedKey.key(), value);
@@ -113,8 +115,6 @@ class PatientMonitoringTopology {
         tempEvents.filter(
             (key, value) ->
                 value != null && value.getTemperature() != null && value.getTemperature() > 100.4);
-
-    // looking for step 6? it's chained right after 5.1
 
     // 7
     StreamJoined<String, Long, BodyTemp> joinParams =

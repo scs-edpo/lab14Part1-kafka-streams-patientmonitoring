@@ -22,7 +22,6 @@ class App {
     Properties props = new Properties();
     props.put(StreamsConfig.APPLICATION_ID_CONFIG, "dev-consumer");
     props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
-    props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
     props.put(StreamsConfig.APPLICATION_SERVER_CONFIG, endpoint);
     props.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);

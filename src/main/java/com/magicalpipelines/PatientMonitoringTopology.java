@@ -9,19 +9,8 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.JoinWindows;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Printed;
-import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.kstream.StreamJoined;
-import org.apache.kafka.streams.kstream.Suppressed;
+import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
-import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.ValueJoiner;
-import org.apache.kafka.streams.kstream.Windowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,21 +44,21 @@ class PatientMonitoringTopology {
 
     // turn pulse into a rate (bpm)
     TimeWindows tumblingWindow =
-        TimeWindows.of(Duration.ofSeconds(60)).grace(Duration.ofSeconds(5));
+        TimeWindows.ofSizeAndGrace(Duration.ofSeconds(60),Duration.ofSeconds(5) );
 
     /*!
      * Examples of other windows (not needed for the tutorial) are commented
      * out below
      *
-     * TimeWindows hoppingWindow =
-     *     TimeWindows.of(Duration.ofSeconds(5)).advanceBy(Duration.ofSeconds(4));
+     *  TimeWindows hoppingWindow =
+     *     TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(5)).advanceBy(Duration.ofSeconds(4));
      *
-     * SessionWindows sessionWindow = SessionWindows.with(Duration.ofSeconds(5));
+     * SessionWindows sessionWindow = SessionWindows.ofInactivityGapWithNoGrace(Duration.ofSeconds(5));
      *
-     * JoinWindows joinWindow = JoinWindows.of(Duration.ofSeconds(5));
+     * JoinWindows joinWindow = JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofSeconds(5));
      *
      * SlidingWindows slidingWindow =
-     *     SlidingWindows.withTimeDifferenceAndGrace(Duration.ofSeconds(5), Duration.ofSeconds(0));
+     *     SlidingWindows.ofTimeDifferenceAndGrace(Duration.ofSeconds(5), Duration.ofSeconds(0));
      */
 
     KTable<Windowed<String>, Long> pulseCounts =
@@ -93,7 +82,7 @@ class PatientMonitoringTopology {
             // when running the application locally :)
             .peek(
                 (key, value) -> {
-                  String id = new String(key.key());
+                  String id = key.key();
                   Long start = key.window().start();
                   Long end = key.window().end();
                   log.info(
@@ -120,12 +109,10 @@ class PatientMonitoringTopology {
     StreamJoined<String, Long, BodyTemp> joinParams =
         StreamJoined.with(Serdes.String(), Serdes.Long(), JsonSerdes.BodyTemp());
 
+      // timestamps must be 1 minute apart
+      // tolerate late arriving data for up to 10 seconds
     JoinWindows joinWindows =
-        JoinWindows
-            // timestamps must be 1 minute apart
-            .of(Duration.ofSeconds(60))
-            // tolerate late arriving data for up to 10 seconds
-            .grace(Duration.ofSeconds(10));
+        JoinWindows.ofTimeDifferenceAndGrace(Duration.ofSeconds(60), Duration.ofSeconds(10));
 
     ValueJoiner<Long, BodyTemp, CombinedVitals> valueJoiner =
         (pulseRate, bodyTemp) -> new CombinedVitals(pulseRate.intValue(), bodyTemp);

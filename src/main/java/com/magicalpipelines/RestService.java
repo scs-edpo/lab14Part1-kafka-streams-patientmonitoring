@@ -49,9 +49,9 @@ class RestService {
     /** Local window store query: all entries */
     app.get("/bpm/all", this::getAll);
 
-    app.get("/bpm/range/:from/:to", this::getAllInRange);
+    app.get("/bpm/range/{from}/{to}", this::getAllInRange);
 
-    app.get("/bpm/range/:key/:from/:to", this::getRange);
+    app.get("/bpm/range/{key}/{from}/{to}", this::getRange);
   }
 
   void getAll(Context ctx) {
@@ -76,8 +76,8 @@ class RestService {
     String from = ctx.pathParam("from");
     String to = ctx.pathParam("to");
 
-    Instant fromTime = Instant.ofEpochMilli(Long.valueOf(from));
-    Instant toTime = Instant.ofEpochMilli(Long.valueOf(to));
+    Instant fromTime = Instant.ofEpochMilli(Long.parseLong(from));
+    Instant toTime = Instant.ofEpochMilli(Long.parseLong(to));
 
     KeyValueIterator<Windowed<String>, Long> range = getBpmStore().fetchAll(fromTime, toTime);
     while (range.hasNext()) {
@@ -107,8 +107,8 @@ class RestService {
     String from = ctx.pathParam("from");
     String to = ctx.pathParam("to");
 
-    Instant fromTime = Instant.ofEpochMilli(Long.valueOf(from));
-    Instant toTime = Instant.ofEpochMilli(Long.valueOf(to));
+    Instant fromTime = Instant.ofEpochMilli(Long.parseLong(from));
+    Instant toTime = Instant.ofEpochMilli(Long.parseLong(to));
 
     WindowStoreIterator<Long> range = getBpmStore().fetch(key, fromTime, toTime);
     while (range.hasNext()) {

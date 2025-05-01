@@ -7,7 +7,7 @@ This code corresponds with Chapter 5 in the O'Reilly book: [Mastering Kafka Stre
 You can start the local Kafka cluster using the following command:
 
 ```sh
-$ docker-compose up
+$ docker compose up
 ```
 
 Now, to run the Kafka Streams application, first run:
@@ -32,7 +32,7 @@ Once your application is running, you can produce some test data to see it in ac
 
 ```sh
 # log into the broker, which is where the kafka console scripts live
-$ docker-compose exec kafka bash
+$ docker compose exec kafka bash
 
 # produce test data to pulse-events topic
 $ kafka-console-producer \
@@ -54,7 +54,7 @@ This Kafka Streams application writes to an `alerts` topic whenever a patient ex
 
 ```sh
 # log into the broker, which is where the kafka console scripts live
-$ docker-compose exec kafka bash
+$ docker compose exec kafka bash
 
 # consume from the beginning of the alerts topic
 $ kafka-console-consumer \

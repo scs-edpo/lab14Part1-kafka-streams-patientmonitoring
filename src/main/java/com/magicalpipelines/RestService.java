@@ -1,6 +1,6 @@
 package com.magicalpipelines;
 
-import com.magicalpipelines.model.CombinedVitals;
+
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.time.Instant;
@@ -16,7 +16,6 @@ import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.apache.kafka.streams.state.WindowStoreIterator;
 import org.slf4j.Logger;
@@ -38,10 +37,6 @@ class RestService {
         StoreQueryParameters.fromNameAndType("pulse-counts", QueryableStoreTypes.windowStore()));
   }
 
-  ReadOnlyKeyValueStore<String, CombinedVitals> getAlertsStore() {
-    return streams.store(
-        StoreQueryParameters.fromNameAndType("alerts", QueryableStoreTypes.keyValueStore()));
-  }
 
   void start() {
     Javalin app = Javalin.create().start(hostInfo.port());

@@ -25,7 +25,7 @@ mvn exec:java
 or via your IDE by running [App](/src/main/java/com/magicalpipelines/App.java). You have to provide
 the required system properties as *VM options* in the run configurations:
 
--Dhost=localhost -Dport=7000 -DstateDir=/tmp/kafka-streams
+-Dhost=localhost -Dport=7001 -DstateDir=/tmp/kafka-streams
 
 # Producing Test Data
 Once your application is running, you can produce some test data to see it in action. Since our patient monitoring application reads from multiple topics (`pulse-events`, `body-temp-events`), we have saved example records for each topic in the `data/` directory. To produce data into each of these topics, open a new tab in your shell and run the following commands.
@@ -38,15 +38,15 @@ $ docker compose exec kafka bash
 $ kafka-console-producer \
   --bootstrap-server kafka:9092 \
   --topic pulse-events \
-  --property 'parse.key=true' \
-  --property 'key.separator=|' < pulse-events.json
+  --reader-property 'parse.key=true' \
+  --reader-property 'key.separator=|' < pulse-events.json
 
 # produce test data to body-temp-events topic
 $ kafka-console-producer \
   --bootstrap-server kafka:9092 \
   --topic body-temp-events \
-  --property 'parse.key=true' \
-  --property 'key.separator=|' < body-temp-events.json
+  --reader-property 'parse.key=true' \
+  --reader-property 'key.separator=|' < body-temp-events.json
 ```
 
 # Consuming the alerts
@@ -78,13 +78,13 @@ You should see an alert similar to the following (prettified for readability):
 
 
 # Query the API
-Our patient monitoring application also exposes patient heart rates using Kafka Streams' interactive queries feature. The API is listening on port `7000`. 
+Our patient monitoring application also exposes patient heart rates using Kafka Streams' interactive queries feature. The API is listening on port `7001`. 
 
 [jq]: https://stedolan.github.io/jq/download/
 
 ### Get the heart rate for all patients, grouped by window
 ```bash
-curl localhost:7000/bpm/all
+curl localhost:7001/bpm/all
 ```
 
 You should see some output like the following:
@@ -103,10 +103,10 @@ The cryptic looking format is actually a compound key, made up of the patient ID
 ```
 
 ### Get the heart rate for a single patient, within a specific time range
-The following query will execute a windowed range scan under the hood. You can replace `1/1606122180000/1606122240000` with any valid value included in the output of the `curl localhost:7000/bpm/all` query we executed above.
+The following query will execute a windowed range scan under the hood. You can replace `1/1606122180000/1606122240000` with any valid value included in the output of the `curl localhost:7001/bpm/all` query we executed above.
 
 ```bash
-curl localhost:7000/bpm/range/1/1606122120000/1606122180000
+curl localhost:7001/bpm/range/1/1606122120000/1606122180000
 ```
 
 You should see output similar to the following:
